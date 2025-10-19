@@ -23,15 +23,12 @@ class PointControllerTest {
     MockMvc mockMvc;
 
     @MockBean
-    PointService pointService;
-
-    @MockBean
-    PointHistoryService pointHistoryService;
+    PointApplication pointApplication;
 
     @Test
     @DisplayName("GET /point/{id}: 사용자 point 조회")
     void getPoints() throws Exception {
-        given(pointService.selectById(1)).willReturn(new UserPoint(1, 0, System.currentTimeMillis()));
+        given(pointApplication.selectPointByUserId(1)).willReturn(new UserPoint(1, 0, System.currentTimeMillis()));
 
         mockMvc.perform(get("/point/1"))
                 .andExpect(status().isOk())
@@ -49,7 +46,7 @@ class PointControllerTest {
                 new PointHistory(2L, userId, -200L, TransactionType.USE, System.currentTimeMillis())
         );
 
-        given(pointHistoryService.selectAllByUserId(userId)).willReturn(histories);
+        given(pointApplication.selectAllHistoryByUserId(userId)).willReturn(histories);
 
         // when & then
         mockMvc.perform(get("/point/{id}/histories", userId)

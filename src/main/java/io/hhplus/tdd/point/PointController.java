@@ -13,8 +13,7 @@ import java.util.List;
 public class PointController {
 
     private static final Logger log = LoggerFactory.getLogger(PointController.class);
-    private final PointService pointService;
-    private final PointHistoryService pointHistoryService;
+    private final PointApplication pointApplication;
 
     /**
      * TODO - 특정 유저의 포인트를 조회하는 기능을 작성해주세요.
@@ -23,7 +22,7 @@ public class PointController {
     public UserPoint point(
             @PathVariable long id
     ) {
-        return pointService.selectById(id);
+        return pointApplication.selectPointByUserId(id);
     }
 
     /**
@@ -33,7 +32,7 @@ public class PointController {
     public List<PointHistory> history(
             @PathVariable long id
     ) {
-        return pointHistoryService.selectAllByUserId(id);
+        return pointApplication.selectAllHistoryByUserId(id);
     }
 
     /**
