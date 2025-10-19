@@ -67,6 +67,22 @@ class PointHistoryServiceTest {
     }
 
     @Test
+    @DisplayName("insertUse는 TransactionType.USE로 insert를 호출한다")
+    void insertUse_calls_insert_with_USE_type() {
+        // given
+        long userId = 1L;
+        long amount = 200L;
+
+        // when
+        pointHistoryService.insertUse(userId, amount);
+
+        // then
+        then(pointHistoryTable).should(times(1))
+                .insert(eq(userId), eq(amount), eq(TransactionType.USE), anyLong());
+        then(pointHistoryTable).shouldHaveNoMoreInteractions();
+    }
+
+    @Test
     @DisplayName("insert는 전달받은 type(USE 등) 그대로 insert를 호출한다")
     void insert_calls_table_with_given_type() {
         // given

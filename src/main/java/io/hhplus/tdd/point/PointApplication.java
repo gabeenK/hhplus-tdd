@@ -26,4 +26,12 @@ public class PointApplication {
         long newAmount = userPoint.point() + amount;
         return pointService.insertOrUpdate(id, newAmount);
     }
+
+    public UserPoint use(long id, long amount) {
+        pointHistoryService.insertUse(id, amount);
+
+        UserPoint userPoint = pointService.selectById(id);
+        long newAmount = userPoint.point() - amount;
+        return pointService.insertOrUpdate(id, newAmount);
+    }
 }

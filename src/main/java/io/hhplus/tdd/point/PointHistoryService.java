@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 import static io.hhplus.tdd.point.TransactionType.CHARGE;
+import static io.hhplus.tdd.point.TransactionType.USE;
 
 @Service
 @RequiredArgsConstructor
@@ -22,6 +23,13 @@ public class PointHistoryService {
             long amount
     ) {
         this.insert(userId, amount, CHARGE);
+    }
+
+    public void insertUse(
+            long userId,
+            long amount
+    ) {
+        this.insert(userId, amount, USE);
     }
 
     void insert(

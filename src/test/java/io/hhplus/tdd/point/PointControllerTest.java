@@ -79,4 +79,23 @@ class PointControllerTest {
                 .andExpect(jsonPath("$.id", is((int) userId)))
                 .andExpect(jsonPath("$.point", is((int) amount)));
     }
+
+    @Test
+    @DisplayName("PATCH /point/{id}/use : 요청 바디 숫자(amount)로 포인트 사용 후 UserPoint 반환")
+    void use_success() throws Exception {
+        // given
+        long userId = 1L;
+        long amount = 50L;
+        UserPoint response = new UserPoint(userId, 950L, System.currentTimeMillis());
+
+        given(pointApplication.use(userId, amount)).willReturn(response);
+
+        // when & then
+        mockMvc.perform(patch("/point/{id}/use", userId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(String.valueOf(amount))) // 숫자 그대로 전달 ("50" 아님)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id", is((int) userId)))
+                .andExpect(jsonPath("$.point", is(950)));
+    }
 }

@@ -122,4 +122,65 @@ class PointApplicationTest {
         then(pointHistoryService).shouldHaveNoMoreInteractions();
         then(pointService).shouldHaveNoMoreInteractions();
     }
+
+    @Test
+    @DisplayName("use: 기존 잔고에서 amount를 빼서 insertOrUpdate(id, newAmount)로 저장한다")
+    void use_subtracts_from_existing_balance_and_persists() {
+        // given
+        long userId = 7L;
+        long before = 1000L;
+        long amount = 300L;
+        long expectedNewAmount = before - amount; // 700
+
+        UserPoint current = new UserPoint(userId, before, System.currentTimeMillis());
+        UserPoint persisted = new UserPoint(userId, expectedNewAmount, System.currentTimeMillis());
+
+        given(pointService.selectById(userId)).willReturn(current);
+        given(pointService.insertOrUpdate(userId, expectedNewAmount)).willReturn(persisted);
+
+        // when
+        UserPoint result = pointApplication.use(userId, amount);
+
+        // then
+        assertThat(result).isEqualTo(persisted);
+
+        // 호출 순서 및 파라미터 검증
+        InOrder inOrder = Mockito.inOrder(pointHistoryService, pointService);
+        inOrder.verify(pointHistoryService).insertUse(userId, amount);
+        inOrder.verify(pointService).selectById(userId);
+        inOrder.verify(pointService).insertOrUpdate(userId, expectedNewAmount);
+
+        then(pointHistoryService).shouldHaveNoMoreInteractions();
+        then(pointService).shouldHaveNoMoreInteractions();
+    }
+
+    @Test
+    @DisplayName("use: 기존 잔고가 amount와 같으면 0으로 저장된다")
+    void use_when_equal_balance_becomes_zero() {
+        // given
+        long userId = 1L;
+        long before = 500L;
+        long amount = 500L;
+        long expectedNewAmount = 0L;
+
+        UserPoint current = new UserPoint(userId, before, System.currentTimeMillis());
+        UserPoint persisted = new UserPoint(userId, expectedNewAmount, System.currentTimeMillis());
+
+        given(pointService.selectById(userId)).willReturn(current);
+        given(pointService.insertOrUpdate(userId, expectedNewAmount)).willReturn(persisted);
+
+        // when
+        UserPoint result = pointApplication.use(userId, amount);
+
+        // then
+        assertThat(result.point()).isEqualTo(expectedNewAmount);
+
+        InOrder inOrder = Mockito.inOrder(pointHistoryService, pointService);
+        inOrder.verify(pointHistoryService).insertUse(userId, amount);
+        inOrder.verify(pointService).selectById(userId);
+        inOrder.verify(pointService).insertOrUpdate(userId, expectedNewAmount);
+
+        then(pointHistoryService).shouldHaveNoMoreInteractions();
+        then(pointService).shouldHaveNoMoreInteractions();
+    }
 }
