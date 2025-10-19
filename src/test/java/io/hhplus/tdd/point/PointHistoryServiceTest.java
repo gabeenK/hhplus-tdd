@@ -12,6 +12,8 @@ import org.mockito.MockitoAnnotations;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.times;
@@ -46,5 +48,38 @@ class PointHistoryServiceTest {
         // then
         assertThat(result).isEqualTo(expected);
         then(pointHistoryTable).should(times(1)).selectAllByUserId(userId);
+    }
+
+    @Test
+    @DisplayName("insertCharge는 type을 CHARGE로 고정하여 insert를 호출한다")
+    void insertCharge_calls_insert_with_charge_type() {
+        // given
+        long userId = 7L;
+        long amount = 1000L;
+
+        // when
+        pointHistoryService.insertCharge(userId, amount);
+
+        // then
+        then(pointHistoryTable).should(times(1))
+                .insert(eq(userId), eq(amount), eq(TransactionType.CHARGE), anyLong());
+        then(pointHistoryTable).shouldHaveNoMoreInteractions();
+    }
+
+    @Test
+    @DisplayName("insert는 전달받은 type(USE 등) 그대로 insert를 호출한다")
+    void insert_calls_table_with_given_type() {
+        // given
+        long userId = 9L;
+        long amount = 300L;
+        TransactionType type = TransactionType.USE;
+
+        // when
+        pointHistoryService.insert(userId, amount, type);
+
+        // then
+        then(pointHistoryTable).should(times(1))
+                .insert(eq(userId), eq(amount), eq(TransactionType.USE), anyLong());
+        then(pointHistoryTable).shouldHaveNoMoreInteractions();
     }
 }

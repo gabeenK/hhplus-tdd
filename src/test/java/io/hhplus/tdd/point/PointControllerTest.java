@@ -14,6 +14,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -58,5 +59,24 @@ class PointControllerTest {
                 .andExpect(jsonPath("$[0].amount", is(500)))
                 .andExpect(jsonPath("$[0].type", is("CHARGE")))
                 .andExpect(jsonPath("$[1].type", is("USE")));
+    }
+
+    @Test
+    @DisplayName("PATCH /point/{id}/charge : amount를 충전 후 UserPoint를 반환한다")
+    void charge_success() throws Exception {
+        // given
+        long userId = 5L;
+        long amount = 300L;
+        UserPoint response = new UserPoint(userId, amount, System.currentTimeMillis());
+
+        given(pointApplication.charge(userId, amount)).willReturn(response);
+
+        // when & then
+        mockMvc.perform(patch("/point/{id}/charge", userId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(String.valueOf(amount)))  // JSON number 바디 (예: 300)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id", is((int) userId)))
+                .andExpect(jsonPath("$.point", is((int) amount)));
     }
 }
